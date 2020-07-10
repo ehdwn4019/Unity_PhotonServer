@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Photon.Pun;
 
-public class PlayerMove : MonoBehaviour
+public class PlayerMove : MonoBehaviourPun
 {
     public float speed = 5.0f; //이동속도
     CharacterController cc; //캐릭터컨트롤러 컴포넌트
@@ -20,31 +21,38 @@ public class PlayerMove : MonoBehaviour
 
     void Update()
     {
-        //플레이어 이동
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
-        Vector3 dir = new Vector3(h, 0, v);
-        //카메라가 보는 방향으로 이동해야 한다
-        dir = Camera.main.transform.TransformDirection(dir);
 
-        //if (cc.collisionFlags == CollisionFlags.Below)
-        if (cc.isGrounded)
+        //이 사용자가 나라면 움직이고 아니면 움직이지 말아라
+        //포톤뷰로 확인이 가능함
+        if(photonView.IsMine) //또는 if(!photonView.IsMine) return;
         {
-            velocityY = 0;
-            if (Input.GetButtonDown("Jump"))
+
+            //플레이어 이동
+            float h = Input.GetAxis("Horizontal");
+            float v = Input.GetAxis("Vertical");
+            Vector3 dir = new Vector3(h, 0, v);
+            //카메라가 보는 방향으로 이동해야 한다
+            dir = Camera.main.transform.TransformDirection(dir);
+
+            //if (cc.collisionFlags == CollisionFlags.Below)
+            if (cc.isGrounded)
             {
-                velocityY = jumpPower;
+                velocityY = 0;
+                if (Input.GetButtonDown("Jump"))
+                {
+                    velocityY = jumpPower;
+                }
             }
-        }
-        else
-        {
-            //땅에 닿지 않은 상태이기때문에 중력적용하기
-            velocityY += gravity * Time.deltaTime;
-            dir.y = velocityY;
-        }
+            else
+            {
+                //땅에 닿지 않은 상태이기때문에 중력적용하기
+                velocityY += gravity * Time.deltaTime;
+                dir.y = velocityY;
+            }
 
 
-        //중력적용 이동
-        cc.Move(dir * speed * Time.deltaTime);
+            //중력적용 이동
+            cc.Move(dir * speed * Time.deltaTime);
+        }
     }
 }
