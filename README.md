@@ -1,2 +1,2 @@
 # Unity_PhotonServer
-photonNetwork
+유니티 포톤네트워크 
